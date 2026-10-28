@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cerita Kita</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,500;12..96,700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>
+tailwind.config = { theme: { extend: {
+  colors: { ink:'#09090d', snow:'#f3f1f6', pink:'#ff3d6e' },
+  fontFamily: { sans:['"Bricolage Grotesque"','system-ui','sans-serif'], serif:['"Instrument Serif"','Georgia','serif'] }
+} } }
+</script>
+<style>
+  html { scroll-behavior:smooth; }
+  body { background:#09090d; }
+  .blob { position:absolute; border-radius:9999px; filter:blur(90px); opacity:.55; animation:drift 18s ease-in-out infinite alternate; }
+  @keyframes drift { to { transform:translate(60px,-40px) scale(1.2); } }
+  .reveal { opacity:0; transform:translateY(20px); transition:opacity .9s ease, transform .9s ease; }
+  .reveal.in { opacity:1; transform:none; }
+  .tile img { transition:transform .9s cubic-bezier(.2,.7,.2,1), filter .5s; }
+  .tile:hover img { transform:scale(1.06); }
+  .tile .cap { background:linear-gradient(to top, rgba(9,9,13,.85), transparent); }
+  .num { font-variant-numeric:tabular-nums; }
+  @media (prefers-reduced-motion:reduce){ .blob{animation:none} .reveal{opacity:1;transform:none;transition:none} html{scroll-behavior:auto} }
+  :focus-visible { outline:2px solid #ff3d6e; outline-offset:3px; }
+</style>
+</head>
+<body class="text-snow font-sans antialiased">
+
+<!-- HERO -->
+<header class="relative min-h-screen overflow-hidden flex flex-col justify-end px-6 sm:px-12 pb-14">
+  <div class="blob w-[60vw] h-[60vw] max-w-[700px] max-h-[700px] bg-pink -top-40 -left-32"></div>
+  <div class="blob w-[50vw] h-[50vw] max-w-[600px] max-h-[600px] bg-indigo-600 top-1/3 -right-40" style="animation-delay:-6s"></div>
+  <div class="relative">
+    <p class="font-serif italic text-2xl sm:text-3xl text-snow/70 mb-4">cerita kita, sejauh ini</p>
+    <h1 id="names" class="font-semibold tracking-tighter leading-[.88] text-[clamp(3.5rem,15vw,13rem)]"></h1>
+    <div class="mt-10 flex flex-wrap items-end justify-between gap-8 border-t border-white/15 pt-6">
+      <div class="flex gap-6 sm:gap-10 num" aria-label="Lama kebersamaan">
+        <div><div id="cd-d" class="text-4xl sm:text-6xl font-light">0</div><div class="text-xs text-snow/50 mt-1">hari</div></div>
+        <div><div id="cd-h" class="text-4xl sm:text-6xl font-light">0</div><div class="text-xs text-snow/50 mt-1">jam</div></div>
+        <div><div id="cd-m" class="text-4xl sm:text-6xl font-light">0</div><div class="text-xs text-snow/50 mt-1">menit</div></div>
+        <div><div id="cd-s" class="text-4xl sm:text-6xl font-light text-pink">0</div><div class="text-xs text-snow/50 mt-1">detik</div></div>
+      </div>
+      <a href="#galeri" class="rounded-full bg-snow text-ink px-7 py-3 font-medium hover:bg-pink hover:text-white transition">Mulai dari awal</a>
+    </div>
+  </div>
+</header>
+
+<!-- GALERI -->
+<main id="galeri" class="px-4 sm:px-12 py-28 max-w-[1500px] mx-auto">
+  <div class="reveal flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-14">
+    <h2 class="font-serif italic text-5xl sm:text-7xl leading-none">Momen-momen<br>yang kusimpan</h2>
+    <!-- <p class="text-snow/50 max-w-xs">20 potongan dari perjalanan kita. Ketuk foto untuk memperbesar.</p> -->
+  </div>
+  <div id="grid" class="columns-2 lg:columns-3 xl:columns-4 gap-3 sm:gap-5"></div>
+</main>
+
+<!-- PENUTUP -->
+<section class="relative overflow-hidden">
+  <div class="relative h-[70vh] min-h-[420px]">
+    <canvas id="heart" class="absolute inset-0 w-full h-full cursor-pointer" aria-label="Animasi hati dari partikel. Gerakkan atau ketuk."></canvas>
+    <p class="absolute bottom-4 inset-x-0 text-center text-xs text-snow/40 pointer-events-none">gerakkan kursor atau ketuk layar</p>
+  </div>
+  <div class="reveal max-w-3xl mx-auto px-6 pb-32 text-center">
+    <h2 class="font-serif italic text-5xl sm:text-7xl leading-none">Untuk kamu.</h2>
+    <div id="closing" class="mt-10 space-y-5 text-lg sm:text-xl text-snow/75 leading-relaxed"></div>
+    <p id="sign" class="font-serif italic text-3xl sm:text-4xl text-pink mt-12"></p>
+  </div>
+</section>
+
+<!-- LIGHTBOX -->
+<div id="lb" class="fixed inset-0 z-50 hidden bg-ink/95 backdrop-blur items-center justify-center p-4" role="dialog" aria-modal="true">
+  <button id="lb-x" class="absolute top-4 right-5 text-3xl" aria-label="Tutup">&times;</button>
+  <button id="lb-p" class="absolute left-2 sm:left-6 text-4xl p-3" aria-label="Sebelumnya">&#8249;</button>
+  <figure class="max-w-4xl w-full text-center">
+    <img id="lb-i" class="max-h-[78vh] mx-auto rounded-2xl object-contain" alt="">
+    <figcaption id="lb-c" class="font-serif italic text-2xl mt-5"></figcaption>
+  </figure>
+  <button id="lb-n" class="absolute right-2 sm:right-6 text-4xl p-3" aria-label="Berikutnya">&#8250;</button>
+</div>
+
+<script>
+/* ============ EDIT BAGIAN INI ============ */
+const CONFIG = {
+  names: 'Aku & Kamu',                 // contoh: 'Rina & Dimas'
+  startDate: '2026-05-11T00:00:00',   // tanggal jadian
+  signature: 'Selamanya milikmu, Aku',
+  closing: [
+    'Terima kasih sudah jadi rumah di hari-hari yang melelahkan, dan alasan tersenyum di hari-hari yang biasa saja.',
+    'Aku tidak tahu apa yang menunggu di depan, tapi aku tahu aku ingin melewatinya bersamamu.',
+    'Semoga foto-foto ini terus bertambah, sampai kita tua dan lupa menghitungnya.'
+  ]
+};
+// Foto: folder "images/" berisi 1.jpeg sampai 20.jpeg. Ubah caption & tanggal di sini.
+const PHOTOS = [
+  ['Awal kita bertemu & kamu kasih pap ke aku','07 Mei 2026'],
+  ['Pertama kali jalan & kita makan pecel lele','07 Mei 2026'],
+  ['Pertama kali kita main keluar, dan maaf cuma ini sayang','16 Mei 2026'],
+  ['Foto pertama kita bareng waktu itu','16 Mei 2026'],
+  ['Pap pertama, ketika kamu bangun tidur','17 Mei 2026'],
+  ['Pertama kali aku photo booth sama kamu','25 Mei 2026'],
+  ['Waktu pas kita photo booth sayangggkuuuu','25 Mei 2026'],
+  ['Hasil setelah photo booth','25 Mei 2026'],
+  ['Waktu aku belajar ditemenin kamu sayangggg','28 Mei 2026'],
+  ['Kita jalan keluar lagi, disini seru banget karena aku kalah UNO wkwk','30 Mei 2026'],
+  ['Hari dimana aku lagi sidang KP, kamu bawain aku bekel HAPPYYY CINTAA!!!','03 Juni 2026'],
+  ['Ini makanan favorit kita berdua sayanggg','13 Juni 2026'],
+  ['Foto kamu bangun tidur pose imuttt!','02 Juli 2026'],
+  ['Moment pertama kalinya kita kealam sayangg, SERUU BANGETT!','12 Juli 2026'],
+  ['Disini banyak moment kocak terjadi wkwk','12 Juli 2026'],
+  ['Moment kita abis selebrasi terus ke jofii sayangggg','16 Juli 2026'],
+  ['Ini abis dari jofi aku teminin kamu ke mos sayanggg','16 Juli 2026'],
+  ['Lagi dan lagi kita ke jofi, makasih ya sayang kamu yang paling banyak dalam hal ini','28 Juli 2026'],
+  ['kita selalu vc canda tawa seruu, kadang marahan, kadang sedih, kadang senang, pokoknya seruuuu!','02 Agustus 2026'],
+  ['Hari terakhir makan dirumah aku waktu kamu beli ini sayangg','12 Agustus 2026'],
+].map(([cap,date],i)=>({ src:`images/${i+1}.jpeg`, cap, date }));
+/* ========================================= */
+
+const $ = id => document.getElementById(id);
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const heartPath = 'M12 21s-7.5-4.6-9.6-9.3C.9 8.2 3 4.5 6.6 4.5c2 0 3.5 1 5.4 3 1.9-2 3.4-3 5.4-3 3.6 0 5.7 3.7 4.2 7.2C19.5 16.4 12 21 12 21z';
+
+$('names').textContent = CONFIG.names;
+$('sign').textContent = CONFIG.signature;
+$('closing').innerHTML = CONFIG.closing.map(t=>`<p>${t}</p>`).join('');
+document.title = 'Cerita ' + CONFIG.names;
+
+/* Penghitung waktu */
+const start = new Date(CONFIG.startDate).getTime();
+(function tick(){
+  const s = Math.max(0, Math.floor((Date.now()-start)/1000));
+  $('cd-d').textContent = Math.floor(s/86400).toLocaleString('id-ID');
+  $('cd-h').textContent = Math.floor(s%86400/3600);
+  $('cd-m').textContent = Math.floor(s%3600/60);
+  $('cd-s').textContent = s%60;
+  setTimeout(tick,1000);
+})();
+
+/* Galeri masonry */
+const ratios = ['aspect-[3/4]','aspect-square','aspect-[4/5]','aspect-[4/3]','aspect-[2/3]','aspect-[5/6]'];
+$('grid').innerHTML = PHOTOS.map((p,i)=>`
+  <button class="tile reveal group relative block w-full mb-3 sm:mb-5 overflow-hidden rounded-2xl bg-gradient-to-br from-pink/40 to-indigo-900/60 ${ratios[(i*5)%6]} break-inside-avoid" data-i="${i}" aria-label="Perbesar: ${p.cap}">
+    <img src="${p.src}" alt="${p.cap}" loading="lazy" class="absolute inset-0 w-full h-full object-cover" onerror="this.style.display='none'">
+    <div class="cap absolute inset-x-0 bottom-0 p-3 sm:p-4 pt-12 text-left">
+      <div class="text-sm sm:text-base font-medium leading-tight">${p.cap}</div>
+      <div class="text-xs text-snow/60 mt-0.5">${p.date}</div>
+    </div>
+  </button>`).join('');
+
+const io = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }),{threshold:.08});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+/* Lightbox */
+let cur = 0;
+function show(i){
+  cur = (i+PHOTOS.length)%PHOTOS.length;
+  const p = PHOTOS[cur];
+  $('lb-i').src = p.src; $('lb-i').alt = p.cap;
+  $('lb-c').textContent = p.cap + ' · ' + p.date;
+  $('lb').classList.remove('hidden'); $('lb').classList.add('flex');
+}
+const hide = ()=>{ $('lb').classList.add('hidden'); $('lb').classList.remove('flex'); };
+$('grid').addEventListener('click',e=>{ const b=e.target.closest('.tile'); if(b) show(+b.dataset.i); });
+$('lb-x').onclick = hide; $('lb-p').onclick = ()=>show(cur-1); $('lb-n').onclick = ()=>show(cur+1);
+$('lb').addEventListener('click',e=>{ if(e.target===$('lb')) hide(); });
+addEventListener('keydown',e=>{
+  if($('lb').classList.contains('hidden')) return;
+  if(e.key==='Escape') hide(); if(e.key==='ArrowLeft') show(cur-1); if(e.key==='ArrowRight') show(cur+1);
+});
+
+/* Hati partikel interaktif */
+const cv = $('heart'), ctx = cv.getContext('2d');
+let W, H, parts = [], hearts = [], mouse = {x:-999,y:-999}, visible = true;
+const N = innerWidth < 640 ? 700 : 1300;
+
+function heartPt(t){
+  return [16*Math.pow(Math.sin(t),3),
+          -(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))];
+}
+function resize(){
+  const dpr = devicePixelRatio || 1, r = cv.getBoundingClientRect();
+  W = r.width; H = r.height;
+  cv.width = W*dpr; cv.height = H*dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+function build(){
+  parts = [];
+  for(let i=0;i<N;i++){
+    const t = Math.random()*6.2832, [hx,hy] = heartPt(t);
+    const f = Math.random() < .55 ? 1 : Math.sqrt(Math.random());  // dominan di tepi
+    parts.push({ hx:hx*f, hy:hy*f, x:Math.random()*W, y:Math.random()*H, vx:0, vy:0,
+                 r:.6+Math.random()*1.5, o:Math.random()*6.28, c:Math.random() });
+  }
+}
+function burst(x,y){
+  for(const p of parts){
+    const dx = p.x-x, dy = p.y-y, d = Math.hypot(dx,dy)+1;
+    const k = Math.max(0, 1-d/320) * 14;
+    p.vx += dx/d*k; p.vy += dy/d*k;
+  }
+  for(let i=0;i<10;i++) hearts.push({ x, y, vx:(Math.random()-.5)*5, vy:-2-Math.random()*4, s:10+Math.random()*16, life:1 });
+}
+function frame(now){
+  if(visible){
+    const t = now/1000;
+    const pulse = reduce ? 1 : 1 + .05*Math.pow(Math.max(0,Math.sin(t*3)),6)*2 + .015*Math.sin(t*1.5);
+    const sc = Math.min(W/38, H/34)*pulse, cx = W/2, cy = H/2 + sc*.8;
+    ctx.clearRect(0,0,W,H);
+    ctx.globalCompositeOperation = 'lighter';
+    for(const p of parts){
+      const wob = reduce ? 0 : Math.sin(t*1.4+p.o)*.35;
+      const tx = cx + (p.hx+wob)*sc, ty = cy + (p.hy+wob)*sc;
+      p.vx += (tx-p.x)*.022; p.vy += (ty-p.y)*.022;
+      const dx = p.x-mouse.x, dy = p.y-mouse.y, d2 = dx*dx+dy*dy;
+      if(d2 < 9000){ const d = Math.sqrt(d2)+1, k = (1-d/95)*2.2; p.vx += dx/d*k; p.vy += dy/d*k; }
+      p.vx *= .9; p.vy *= .9; p.x += p.vx; p.y += p.vy;
+      ctx.fillStyle = p.c < .7 ? 'rgba(255,61,110,.75)' : p.c < .9 ? 'rgba(255,130,150,.7)' : 'rgba(255,230,235,.8)';
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,6.2832); ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+    for(let i=hearts.length-1;i>=0;i--){
+      const h = hearts[i];
+      h.x += h.vx; h.y += h.vy; h.vy += .06; h.life -= .01;
+      if(h.life<=0){ hearts.splice(i,1); continue; }
+      ctx.save(); ctx.translate(h.x-h.s/2,h.y-h.s/2); ctx.scale(h.s/24,h.s/24);
+      ctx.globalAlpha = h.life; ctx.fillStyle = '#ff3d6e'; ctx.fill(new Path2D(heartPath)); ctx.restore();
+    }
+  }
+  requestAnimationFrame(frame);
+}
+cv.addEventListener('pointermove',e=>{ const r=cv.getBoundingClientRect(); mouse.x=e.clientX-r.left; mouse.y=e.clientY-r.top; });
+cv.addEventListener('pointerleave',()=>{ mouse.x = mouse.y = -999; });
+cv.addEventListener('pointerdown',e=>{ const r=cv.getBoundingClientRect(); burst(e.clientX-r.left, e.clientY-r.top); });
+new IntersectionObserver(es=>{ visible = es[0].isIntersecting; }).observe(cv);
+let first = true;
+new IntersectionObserver((es,o)=>{ if(es[0].isIntersecting && first){ first=false; setTimeout(()=>burst(W/2,H/2+20),500); } },{threshold:.5}).observe(cv);
+addEventListener('resize',()=>{ resize(); });
+resize(); build(); requestAnimationFrame(frame);
+</script>
+</body>
+</html>
